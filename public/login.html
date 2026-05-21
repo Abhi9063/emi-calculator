@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — EMI Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --bg:#0b0f1a; --surface:#111827; --surface2:#1a2235; --border:#1f2d45; --accent:#f5a623; --text:#e8edf5; --muted:#7a8aa0; --red:#e74c3c; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:48px 40px; width:100%; max-width:420px; }
+    .logo { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--accent); text-align:center; margin-bottom:8px; }
+    .subtitle { color:var(--muted); font-size:0.9rem; text-align:center; margin-bottom:36px; }
+    .field { margin-bottom:20px; }
+    label { display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:8px; }
+    input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:1rem; outline:none; transition:border-color 0.2s; }
+    input:focus { border-color:var(--accent); }
+    .btn { width:100%; background:linear-gradient(135deg,#f5a623,#e07b1f); color:#0b0f1a; font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem; border:none; border-radius:14px; padding:16px; cursor:pointer; margin-top:8px; text-transform:uppercase; letter-spacing:0.04em; transition:transform 0.15s,box-shadow 0.15s; }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(245,166,35,0.3); }
+    .error { background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.3); border-radius:10px; padding:12px 16px; color:var(--red); font-size:0.88rem; margin-top:16px; display:none; }
+    .link { text-align:center; margin-top:24px; font-size:0.88rem; color:var(--muted); }
+    .link a { color:var(--accent); text-decoration:none; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">EMICalc</div>
+  <div class="subtitle">Sign in to your account</div>
+
+  <div class="field">
+    <label>Email Address</label>
+    <input type="email" id="email" placeholder="you@example.com"/>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Enter your password"/>
+  </div>
+
+  <button class="btn" onclick="login()">Login →</button>
+  <div class="error" id="errorMsg"></div>
+
+  <div class="link">Don't have an account? <a href="/register">Register here</a></div>
+</div>
+
+<script>
+  // If already logged in, redirect
+  fetch('/api/me').then(r => r.json()).then(d => { if (d.user) window.location.href = '/'; });
+
+  async function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errEl.textContent = data.error;
+      errEl.style.display = 'block';
+    } else {
+      window.location.href = '/';
+    }
+  }
+
+  // Allow Enter key
+  document.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>

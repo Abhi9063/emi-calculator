@@ -457,7 +457,10 @@
 
 <header>
   <div class="logo">EMI<span>Calc</span></div>
-  <div class="badge">Loan Calculator</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="badge" id="userBadge">Loading...</div>
+    <button onclick="logout()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-family:'DM Sans',sans-serif;">Logout</button>
+  </div>
 </header>
 
 <main>
@@ -728,8 +731,22 @@
     document.getElementById('toggleBtn').textContent = showAll ? 'Show Less' : 'Show All';
   }
 
-  // Auto-calculate on load
-  window.addEventListener('load', calculate);
+  // Check login on load
+  window.addEventListener('load', async () => {
+    const res = await fetch('/api/me');
+    const data = await res.json();
+    if (!data.user) {
+      window.location.href = '/login';
+    } else {
+      document.getElementById('userBadge').textContent = '👤 ' + data.user.name;
+      calculate();
+    }
+  });
+
+  async function logout() {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
 </script>
 
 </body>
